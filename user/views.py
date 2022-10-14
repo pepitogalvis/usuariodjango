@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django import forms
 from .models import UserProfile
 from django.contrib.auth.models import User
@@ -22,7 +22,13 @@ class UserProfileForm(forms.ModelForm):
 @transaction.atomic
 def update_profile(request):
     if request.method == "POST":
-        pass
+        user_form = UserForm(request.POST, instance=request.user)
+        user_profile_form = UserProfileForm(request.POST,
+                                            instance=request.user.userprofile)
+        if user_form.is_valid() and user_profile_form.is_valid():
+            user_form.save()
+            user_profile_form.save()
+            return redirect("user:profile")
     else:
         user_form = UserForm(instance=request.user)
         user_profile_form = UserProfileForm(instance=request.user.userprofile)
